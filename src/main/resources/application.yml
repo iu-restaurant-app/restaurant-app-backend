@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: "restaurant-app-backend"
+  datasource:
+    url: "jdbc:postgresql://restaurant-db:5432/restaurant-db"
+    driver-class-name: "org.postgresql.Driver"
+  jpa:
+    database: "postgresql"
+    hibernate:
+      ddl-auto: "update"

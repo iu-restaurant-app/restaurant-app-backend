@@ -35,3 +35,30 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootJar {
+	archiveFileName = "restaurantApp.jar"
+}
+
+tasks.register("buildDeployDockerImage", Exec) {
+	group "docker"
+	dependsOn bootJar
+	commandLine "docker", "build", "--platform", "linux/amd64", "-t", "almaxgood/restaurant-app", "."
+}
+
+tasks.register("buildDockerImage", Exec) {
+	group "docker"
+	dependsOn bootJar
+	commandLine "docker", "build", "-t", "restaurant-app", "."
+}
+
+tasks.register("startDockerImage", Exec) {
+	group "docker"
+	dependsOn buildDockerImage
+	commandLine "docker", "compose", "up", "-d"
+}
+
+tasks.register("stopDockerImage", Exec) {
+	group "docker"
+	commandLine "docker", "compose", "down"
+}

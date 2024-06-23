@@ -1,0 +1,21 @@
+name: "restaurant-app"
+
+services:
+  restaurant-db:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=restaurant-db'
+      - 'POSTGRES_USER=${POSTGRES_USER}'
+      - 'POSTGRES_PASSWORD=${POSTGRES_PASSWORD}'
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'restaurant-db-volume:/var/lib/postgresql/data'
+
+  restaurant-app:
+    image: 'restaurant-app:latest'
+    depends_on:
+      - restaurant-db
+
+volumes:
+  restaurant-db-volume:
