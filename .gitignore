@@ -20,7 +20,6 @@ bin/
 
 ### IntelliJ IDEA ###
 .env
-hidden.properties
 .idea
 *.iws
 *.iml

@@ -4,7 +4,11 @@ spring:
   datasource:
     url: "jdbc:postgresql://restaurant-db:5432/restaurant-db"
     driver-class-name: "org.postgresql.Driver"
+    username: "${POSTGRES_USER}"
+    password: "${POSTGRES_PASSWORD}"
   jpa:
     database: "postgresql"
     hibernate:
       ddl-auto: "update"
+server:
+  port: 8080
