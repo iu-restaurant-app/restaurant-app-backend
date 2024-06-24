@@ -30,6 +30,7 @@ public class MealService {
         return mealEntityOptional.get();
     }
 
+    @Transactional
     public void saveMeal(MultipartFile multipartFile, MealCreateRequest mealCreateRequest) throws IOException, MealAlreadyExistException {
         if (mealRepository.getByTitle(mealCreateRequest.getTitle()).isPresent()) {
             throw new MealAlreadyExistException();
@@ -46,6 +47,7 @@ public class MealService {
         mealRepository.save(mealEntity);
     }
 
+    @Transactional
     public void deleteMeal(String title) throws NoSuchMealException {
         Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
 
@@ -54,5 +56,17 @@ public class MealService {
         }
 
         mealRepository.deleteByTitle(title);
+    }
+
+    @Transactional
+    public void updateMeal(String title, MultipartFile multipartFile, MealCreateRequest mealCreateRequest) throws NoSuchMealException, IOException, MealAlreadyExistException {
+        Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
+
+        if (mealEntityOptional.isEmpty()) {
+            throw new NoSuchMealException();
+        }
+
+        mealRepository.delete(mealEntityOptional.get());
+        saveMeal(multipartFile, mealCreateRequest);
     }
 }
