@@ -2,7 +2,6 @@ package iu.frontenders.restaurantappbackend.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +22,5 @@ public class MealEntity {
     private String description;
     private Integer calories;
     private Integer price;
-
-    @Lob
-    private byte[] image;
+    private String imageName;
 }

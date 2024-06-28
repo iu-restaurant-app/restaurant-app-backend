@@ -15,4 +15,11 @@ spring:
       max-file-size: "15MB"
       max-request-size: "15MB"
 server:
+  error:
+    whitelabel:
+      enabled: false
   port: 8080
+minio:
+  base-url: "http://minio:9000"
+  username: "${MINIO_ROOT_USER}"
+  password: "${MINIO_ROOT_PASSWORD}"

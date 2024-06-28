@@ -7,9 +7,13 @@ import lombok.extern.jackson.Jacksonized;
 @Value
 @Builder(toBuilder = true)
 @Jacksonized
-public class MealCreateRequest {
+public class MealRequestResponse {
+
     String title;
     String description;
     Integer calories;
     Integer price;
+
+    String imageName;
+    byte[] image;
 }

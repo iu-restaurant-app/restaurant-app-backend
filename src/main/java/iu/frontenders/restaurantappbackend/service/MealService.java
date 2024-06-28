@@ -1,16 +1,23 @@
 package iu.frontenders.restaurantappbackend.service;
 
+import io.minio.errors.ErrorResponseException;
+import io.minio.errors.InsufficientDataException;
+import io.minio.errors.InternalException;
+import io.minio.errors.InvalidResponseException;
+import io.minio.errors.ServerException;
+import io.minio.errors.XmlParserException;
 import iu.frontenders.restaurantappbackend.entity.MealEntity;
 import iu.frontenders.restaurantappbackend.exception.MealAlreadyExistException;
 import iu.frontenders.restaurantappbackend.exception.NoSuchMealException;
 import iu.frontenders.restaurantappbackend.repository.MealRepository;
-import iu.frontenders.restaurantappbackend.request.MealCreateRequest;
-import jakarta.transaction.Transactional;
+import iu.frontenders.restaurantappbackend.request.MealRequestResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -18,55 +25,69 @@ import java.util.Optional;
 public class MealService {
 
     private final MealRepository mealRepository;
+    private final MinioService minioService;
 
-    @Transactional
-    public MealEntity getMeal(String title) throws NoSuchMealException {
-        Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
+    public void createMeal(MealRequestResponse mealRequestResponse) throws ServerException, InsufficientDataException, ErrorResponseException, MealAlreadyExistException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
-        if (mealEntityOptional.isEmpty()) {
-            throw new NoSuchMealException();
-        }
-
-        return mealEntityOptional.get();
-    }
-
-    @Transactional
-    public void saveMeal(MultipartFile multipartFile, MealCreateRequest mealCreateRequest) throws IOException, MealAlreadyExistException {
-        if (mealRepository.getByTitle(mealCreateRequest.getTitle()).isPresent()) {
+        if (mealRepository.getByTitle(mealRequestResponse.getTitle()).isPresent()) {
             throw new MealAlreadyExistException();
         }
 
         MealEntity mealEntity = MealEntity.builder()
-                .title(mealCreateRequest.getTitle())
-                .description(mealCreateRequest.getDescription())
-                .calories(mealCreateRequest.getCalories())
-                .price(mealCreateRequest.getPrice())
-                .image(multipartFile.getBytes())
+                .title(mealRequestResponse.getTitle())
+                .description(mealRequestResponse.getDescription())
+                .calories(mealRequestResponse.getCalories())
+                .price(mealRequestResponse.getPrice())
+                .imageName(minioService.addImage(
+                        mealRequestResponse.getImageName(),
+                        mealRequestResponse.getImage()
+                ))
                 .build();
 
         mealRepository.save(mealEntity);
     }
 
-    @Transactional
-    public void deleteMeal(String title) throws NoSuchMealException {
-        Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
+    public MealRequestResponse getMeal(String title) throws NoSuchMealException, ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
+        Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
         if (mealEntityOptional.isEmpty()) {
             throw new NoSuchMealException();
         }
+        MealEntity mealEntity = mealEntityOptional.get();
 
-        mealRepository.deleteByTitle(title);
+        return MealRequestResponse.builder()
+                .title(mealEntity.getTitle())
+                .description(mealEntity.getDescription())
+                .calories(mealEntity.getCalories())
+                .price(mealEntity.getPrice())
+                .imageName(mealEntity.getImageName())
+                .image(minioService.getImage(mealEntity.getImageName()))
+                .build();
     }
 
-    @Transactional
-    public void updateMeal(String title, MultipartFile multipartFile, MealCreateRequest mealCreateRequest) throws NoSuchMealException, IOException, MealAlreadyExistException {
-        Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
+    public MealRequestResponse deleteMeal(String title) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
-        if (mealEntityOptional.isEmpty()) {
-            throw new NoSuchMealException();
-        }
+        MealRequestResponse mealRequestResponse = getMeal(title);
+        mealRepository.delete(MealEntity.builder()
+                .title(mealRequestResponse.getTitle())
+                .description(mealRequestResponse.getDescription())
+                .calories(mealRequestResponse.getCalories())
+                .price(mealRequestResponse.getPrice())
+                .imageName(mealRequestResponse.getImageName())
+                .build()
+        );
+        minioService.deleteImage(mealRequestResponse.getImageName());
 
-        mealRepository.delete(mealEntityOptional.get());
-        saveMeal(multipartFile, mealCreateRequest);
+        return mealRequestResponse;
+    }
+
+    public void updateMeal(String title, MealRequestResponse mealRequestResponse) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, MealAlreadyExistException {
+
+        deleteMeal(title);
+        createMeal(mealRequestResponse);
+    }
+
+    public List<MealEntity> getAllMeals() {
+        return mealRepository.findAll();
     }
 }
