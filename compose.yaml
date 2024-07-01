@@ -7,6 +7,7 @@ services:
       - '9001:9001'
     container_name: 'minio-obj-storage'
     tty: true
+    env_file: ./.env
     volumes:
       - 'minio-volume:/data'
     environment:
@@ -18,6 +19,7 @@ services:
   restaurant-db:
     image: 'postgres:latest'
     tty: true
+    env_file: ./.env
     container_name: 'restaurant-db'
     environment:
       - 'POSTGRES_DB=restaurant-db'
@@ -31,14 +33,13 @@ services:
   restaurant-app:
     image: 'restaurant-app:latest'
     container_name: 'restaurant-app'
-    env_file: .env
     tty: true
+    env_file: ./.env
     depends_on:
       - restaurant-db
       - minio
     ports:
       - '8080:8080'
-#      - '5005:5005'
 
 volumes:
   restaurant-db-volume:
