@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,7 +88,23 @@ public class MealService {
         createMeal(mealRequestResponse);
     }
 
-    public List<MealEntity> getAllMeals() {
-        return mealRepository.findAll();
+    public List<MealRequestResponse> getAllMeals() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+
+        List<MealEntity> mealEntities = mealRepository.findAll();
+        List<MealRequestResponse> mealRequestResponses = new ArrayList<>();
+
+        for (MealEntity mealEntity : mealEntities) {
+            mealRequestResponses.add(MealRequestResponse.builder()
+                    .title(mealEntity.getTitle())
+                    .description(mealEntity.getDescription())
+                    .calories(mealEntity.getCalories())
+                    .price(mealEntity.getPrice())
+                    .imageName(mealEntity.getImageName())
+                    .image(minioService.getImage(mealEntity.getImageName()))
+                    .build()
+            );
+        }
+
+        return mealRequestResponses;
     }
 }
