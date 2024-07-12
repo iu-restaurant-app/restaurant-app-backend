@@ -1,9 +1,9 @@
-name: Continuous Deployment
+name: Continuous Integration
 on:
   pull_request:
     branches: [ main ]
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,7 +22,7 @@ jobs:
         run: ./gradlew bootJar
 
       - name: Build Docker image
-        run: docker build --platform linux/amd64 -t almaxgood/restaurant-app-backend .
+        run: docker build --platform linux/amd64 -t almaxgood/restaurant-app-backend:temp .
 
       - name: Push Docker image
-        run: docker push almaxgood/restaurant-app-backend
+        run: docker push almaxgood/restaurant-app-backend:temp
