@@ -23,6 +23,7 @@ repositories {
 }
 
 dependencies {
+	implementation("io.minio:minio:8.5.11")
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -36,20 +37,37 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.register("stopDockerImage", Exec) {
+	group "docker"
+	commandLine "docker", "compose", "down"
+}
+
 bootJar {
-	archiveFileName = "restaurantApp.jar"
+	archiveFileName = "restaurantAppBackend.jar"
+}
+
+tasks.register("bootJarWithStop") {
+	group "build"
+	dependsOn bootJar
+	dependsOn stopDockerImage
 }
 
 tasks.register("buildDeployDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJar
-	commandLine "docker", "build", "--platform", "linux/amd64", "-t", "almaxgood/restaurant-app", "."
+	commandLine "docker", "build", "--platform", "linux/amd64", "-t", "almaxgood/restaurant-app-backend", "."
 }
 
 tasks.register("buildDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJar
-	commandLine "docker", "build", "-t", "restaurant-app", "."
+	commandLine "docker", "build", "-t", "restaurant-app-backend", "."
+}
+
+tasks.register("rebuildDockerImage", Exec) {
+	group "docker"
+	dependsOn bootJarWithStop
+	commandLine "docker", "build", "-t", "restaurant-app-backend", "."
 }
 
 tasks.register("startDockerImage", Exec) {
@@ -58,7 +76,8 @@ tasks.register("startDockerImage", Exec) {
 	commandLine "docker", "compose", "up", "-d"
 }
 
-tasks.register("stopDockerImage", Exec) {
+tasks.register("restartDockerImage", Exec) {
 	group "docker"
-	commandLine "docker", "compose", "down"
+	dependsOn rebuildDockerImage
+	commandLine "docker", "compose", "up", "-d"
 }

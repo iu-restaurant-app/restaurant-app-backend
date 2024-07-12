@@ -1,0 +1,28 @@
+name: Continuous Deployment
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Authorize in Docker
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up JDK 20
+        uses: actions/setup-java@v2
+        with:
+          java-version: '20'
+          distribution: 'adopt'
+
+      - name: Build JAR
+        run: ./gradlew bootJar
+
+      - name: Build Docker image
+        run: docker build --platform linux/amd64 -t almaxgood/restaurant-app-backend .
+
+      - name: Push Docker image
+        run: docker push almaxgood/restaurant-app-backend
