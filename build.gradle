@@ -43,7 +43,7 @@ tasks.register("stopDockerImage", Exec) {
 }
 
 bootJar {
-	archiveFileName = "restaurantApp.jar"
+	archiveFileName = "restaurantAppBackend.jar"
 }
 
 tasks.register("bootJarWithStop") {
@@ -55,19 +55,19 @@ tasks.register("bootJarWithStop") {
 tasks.register("buildDeployDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJar
-	commandLine "docker", "build", "--platform", "linux/amd64", "-t", "almaxgood/restaurant-app", "."
+	commandLine "docker", "build", "--platform", "linux/amd64", "-t", "almaxgood/restaurant-app-backend", "."
 }
 
 tasks.register("buildDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJar
-	commandLine "docker", "build", "-t", "restaurant-app", "."
+	commandLine "docker", "build", "-t", "restaurant-app-backend", "."
 }
 
 tasks.register("rebuildDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJarWithStop
-	commandLine "docker", "build", "-t", "restaurant-app", "."
+	commandLine "docker", "build", "-t", "restaurant-app-backend", "."
 }
 
 tasks.register("startDockerImage", Exec) {

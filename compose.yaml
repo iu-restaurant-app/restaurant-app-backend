@@ -1,4 +1,4 @@
-name: "restaurant-app"
+name: "restaurant-app-backend"
 
 services:
   minio:
@@ -30,9 +30,9 @@ services:
     volumes:
       - 'restaurant-db-volume:/var/lib/postgresql/data'
 
-  restaurant-app:
-    image: 'restaurant-app:latest'
-    container_name: 'restaurant-app'
+  restaurant-app-backend:
+    image: 'restaurant-app-backend:latest'
+    container_name: 'restaurant-app-backend'
     tty: true
     env_file: ./.env
     depends_on:
