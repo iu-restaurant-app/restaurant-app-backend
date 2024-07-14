@@ -1,7 +1,7 @@
 name: Continuous Integration
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev ]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,3 +26,6 @@ jobs:
 
       - name: Push Docker image
         run: docker push almaxgood/restaurant-app-backend:temp
+
+      - name: Run Docker container
+        run: docker compose up -d
