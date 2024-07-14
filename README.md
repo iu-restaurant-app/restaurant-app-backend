@@ -13,7 +13,5 @@ This is a Pasta Palace restaurant website where you can:
 3. Login to Docker Hub
 4. Create directory with the name given in ```CD.yml```
 5. Copy there ```compose.yaml```
-6. Update ```compose.yaml``` file:
-   1. Change image name
-   2. Change host port (left one) to 80
+6. Change image name in ```compose.yaml``` file
 7. Update GitHub secrets
