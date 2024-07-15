@@ -28,4 +28,23 @@ jobs:
         run: docker push almaxgood/restaurant-app-backend:temp
 
       - name: Run Docker container
-        run: docker compose up -d
+        run: |
+          docker volume create restaurant-db-volume
+          docker volume create minio-volume
+          docker run -d -p 9000:9000 -p 9001:9001 --name minio-obj-storage -t -v minio-volume:/data -e MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }} -e MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }} quay.io/minio/minio server /data --console-address ":9001"
+          docker run -d -t --name restaurant-db -e POSTGRES_DB=restaurant-db -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} -p 5432:5432 -v restaurant-db-volume:/var/lib/postgresql/data postgres:latest
+          docker run -d --name restaurant-app-backend -t -p 8080:8080 almaxgood/restaurant-app-backend:temp
+
+      - name: Wait Docker container to start
+        uses: GuillaumeFalourd/wait-sleep-action@v1
+        with:
+          time: '60'
+
+      - name: Show restaurant-db logs
+        run: docker logs restaurant-db
+
+      - name: Show minio-obj-storage logs
+        run: docker logs minio-obj-storage
+
+      - name: Show restaurant-app-backend logs
+        run: docker logs restaurant-app-backend

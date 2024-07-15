@@ -22,10 +22,10 @@ jobs:
         run: ./gradlew bootJar
 
       - name: Build Docker image
-        run: docker build --platform linux/amd64 -t almaxgood/restaurant-app-backend .
+        run: docker build --platform linux/amd64 -t almaxgood/restaurant-app-backend:latest .
 
       - name: Push Docker image
-        run: docker push almaxgood/restaurant-app-backend
+        run: docker push almaxgood/restaurant-app-backend:latest
 
       - name: Install sshpass
         run: sudo apt install sshpass
