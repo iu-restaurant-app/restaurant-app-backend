@@ -34,5 +34,5 @@ jobs:
         run: sshpass -p ${{ secrets.VM_PASSWORD }} ssh -o StrictHostKeyChecking=no root@${{ secrets.VM_IP }}
           'cd ~/restaurant-app-backend &&
           docker compose down &&
-          docker system prune -a -f &&
+          docker system prune -a -f --volumes &&
           docker compose up -d'
