@@ -6,9 +6,10 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidResponseException;
 import io.minio.errors.ServerException;
 import io.minio.errors.XmlParserException;
+import iu.frontenders.restaurantappbackend.data.MealRequest;
+import iu.frontenders.restaurantappbackend.data.MealResponse;
 import iu.frontenders.restaurantappbackend.exception.MealAlreadyExistException;
 import iu.frontenders.restaurantappbackend.exception.NoSuchMealException;
-import iu.frontenders.restaurantappbackend.request.MealRequestResponse;
 import iu.frontenders.restaurantappbackend.service.MealService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -36,37 +38,53 @@ public class MealController {
 
     @PostMapping
     @CrossOrigin(origins = "*")
-    public ResponseEntity<Void> createMeal(@RequestBody MealRequestResponse mealRequestResponse) throws ServerException, InsufficientDataException, ErrorResponseException, MealAlreadyExistException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ResponseEntity<Void> createMeal(@RequestBody MealResponse mealResponse) throws ServerException, InsufficientDataException, ErrorResponseException, MealAlreadyExistException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
-        mealService.createMeal(mealRequestResponse);
+        mealService.createMeal(MealRequest.builder()
+                .title(mealResponse.getTitle())
+                .description(mealResponse.getDescription())
+                .calories(mealResponse.getCalories())
+                .price(mealResponse.getPrice())
+                .imageName(mealResponse.getImageName())
+                .image(Base64.getDecoder().decode(mealResponse.getImage()))
+                .build()
+        );
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{title}")
     @CrossOrigin(origins = "*")
-    public ResponseEntity<MealRequestResponse> getMeal(@PathVariable String title) throws NoSuchMealException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ResponseEntity<MealRequest> getMeal(@PathVariable String title) throws NoSuchMealException, IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         return ResponseEntity.ok(mealService.getMeal(title));
     }
 
     @DeleteMapping("/{title}")
     @CrossOrigin(origins = "*")
-    public ResponseEntity<MealRequestResponse> deleteMeal(@PathVariable String title) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ResponseEntity<MealRequest> deleteMeal(@PathVariable String title) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         return ResponseEntity.ok(mealService.deleteMeal(title));
     }
 
     @PatchMapping("/{title}")
     @CrossOrigin(origins = "*")
-    public ResponseEntity<Void> updateMeal(@PathVariable String title, @RequestBody MealRequestResponse mealRequestResponse) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, MealAlreadyExistException {
+    public ResponseEntity<Void> updateMeal(@PathVariable String title, @RequestBody MealResponse mealResponse) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, MealAlreadyExistException {
 
-        mealService.updateMeal(title, mealRequestResponse);
+        mealService.updateMeal(title, MealRequest.builder()
+                .title(mealResponse.getTitle())
+                .description(mealResponse.getDescription())
+                .calories(mealResponse.getCalories())
+                .price(mealResponse.getPrice())
+                .imageName(mealResponse.getImageName())
+                .image(Base64.getDecoder().decode(mealResponse.getImage()))
+                .build()
+        );
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     @CrossOrigin(origins = "*")
-    public ResponseEntity<List<MealRequestResponse>> getAllMeals() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public ResponseEntity<List<MealRequest>> getAllMeals() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         return ResponseEntity.ok(mealService.getAllMeals());
     }

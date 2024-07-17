@@ -1,4 +1,4 @@
-package iu.frontenders.restaurantappbackend.request;
+package iu.frontenders.restaurantappbackend.data;
 
 import lombok.Builder;
 import lombok.Value;
@@ -7,7 +7,7 @@ import lombok.extern.jackson.Jacksonized;
 @Value
 @Builder(toBuilder = true)
 @Jacksonized
-public class MealRequestResponse {
+public class MealRequest {
 
     String title;
     String description;

@@ -10,7 +10,7 @@ import iu.frontenders.restaurantappbackend.entity.MealEntity;
 import iu.frontenders.restaurantappbackend.exception.MealAlreadyExistException;
 import iu.frontenders.restaurantappbackend.exception.NoSuchMealException;
 import iu.frontenders.restaurantappbackend.repository.MealRepository;
-import iu.frontenders.restaurantappbackend.request.MealRequestResponse;
+import iu.frontenders.restaurantappbackend.data.MealRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,27 +28,27 @@ public class MealService {
     private final MealRepository mealRepository;
     private final MinioService minioService;
 
-    public void createMeal(MealRequestResponse mealRequestResponse) throws ServerException, InsufficientDataException, ErrorResponseException, MealAlreadyExistException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public void createMeal(MealRequest mealRequest) throws ServerException, InsufficientDataException, ErrorResponseException, MealAlreadyExistException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
-        if (mealRepository.getByTitle(mealRequestResponse.getTitle()).isPresent()) {
+        if (mealRepository.getByTitle(mealRequest.getTitle()).isPresent()) {
             throw new MealAlreadyExistException();
         }
 
         MealEntity mealEntity = MealEntity.builder()
-                .title(mealRequestResponse.getTitle())
-                .description(mealRequestResponse.getDescription())
-                .calories(mealRequestResponse.getCalories())
-                .price(mealRequestResponse.getPrice())
+                .title(mealRequest.getTitle())
+                .description(mealRequest.getDescription())
+                .calories(mealRequest.getCalories())
+                .price(mealRequest.getPrice())
                 .imageName(minioService.addImage(
-                        mealRequestResponse.getImageName(),
-                        mealRequestResponse.getImage()
+                        mealRequest.getImageName(),
+                        mealRequest.getImage()
                 ))
                 .build();
 
         mealRepository.save(mealEntity);
     }
 
-    public MealRequestResponse getMeal(String title) throws NoSuchMealException, ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public MealRequest getMeal(String title) throws NoSuchMealException, ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         Optional<MealEntity> mealEntityOptional = mealRepository.getByTitle(title);
         if (mealEntityOptional.isEmpty()) {
@@ -56,7 +56,7 @@ public class MealService {
         }
         MealEntity mealEntity = mealEntityOptional.get();
 
-        return MealRequestResponse.builder()
+        return MealRequest.builder()
                 .title(mealEntity.getTitle())
                 .description(mealEntity.getDescription())
                 .calories(mealEntity.getCalories())
@@ -66,35 +66,35 @@ public class MealService {
                 .build();
     }
 
-    public MealRequestResponse deleteMeal(String title) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public MealRequest deleteMeal(String title) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
-        MealRequestResponse mealRequestResponse = getMeal(title);
+        MealRequest mealRequest = getMeal(title);
         mealRepository.delete(MealEntity.builder()
-                .title(mealRequestResponse.getTitle())
-                .description(mealRequestResponse.getDescription())
-                .calories(mealRequestResponse.getCalories())
-                .price(mealRequestResponse.getPrice())
-                .imageName(mealRequestResponse.getImageName())
+                .title(mealRequest.getTitle())
+                .description(mealRequest.getDescription())
+                .calories(mealRequest.getCalories())
+                .price(mealRequest.getPrice())
+                .imageName(mealRequest.getImageName())
                 .build()
         );
-        minioService.deleteImage(mealRequestResponse.getImageName());
+        minioService.deleteImage(mealRequest.getImageName());
 
-        return mealRequestResponse;
+        return mealRequest;
     }
 
-    public void updateMeal(String title, MealRequestResponse mealRequestResponse) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, MealAlreadyExistException {
+    public void updateMeal(String title, MealRequest mealRequest) throws ServerException, NoSuchMealException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, MealAlreadyExistException {
 
         deleteMeal(title);
-        createMeal(mealRequestResponse);
+        createMeal(mealRequest);
     }
 
-    public List<MealRequestResponse> getAllMeals() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    public List<MealRequest> getAllMeals() throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
 
         List<MealEntity> mealEntities = mealRepository.findAll();
-        List<MealRequestResponse> mealRequestResponses = new ArrayList<>();
+        List<MealRequest> mealRequests = new ArrayList<>();
 
         for (MealEntity mealEntity : mealEntities) {
-            mealRequestResponses.add(MealRequestResponse.builder()
+            mealRequests.add(MealRequest.builder()
                     .title(mealEntity.getTitle())
                     .description(mealEntity.getDescription())
                     .calories(mealEntity.getCalories())
@@ -105,6 +105,6 @@ public class MealService {
             );
         }
 
-        return mealRequestResponses;
+        return mealRequests;
     }
 }
